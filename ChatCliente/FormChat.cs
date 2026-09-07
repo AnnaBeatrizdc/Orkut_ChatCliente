@@ -17,6 +17,12 @@ namespace ChatCliente
 
         private string nomeUsuario;
 
+        private Dictionary<string, List<(string texto, bool minhaMensagem)>> conversas =
+            new Dictionary<string, List<(string texto, bool minhaMensagem)>>();
+
+        private HashSet<string> conversasNaoLidas =
+            new HashSet<string>();
+
         public FormChat(string nome)
         {
             InitializeComponent();
@@ -67,6 +73,8 @@ namespace ChatCliente
 
                                 lstUsuarios.Items.Clear();
 
+                                lstUsuarios.Items.Add("Chat Geral");
+
                                 for (int i = 1; i < partes.Length; i++)
                                 {
                                     if (partes[i] != nomeUsuario)
@@ -75,6 +83,47 @@ namespace ChatCliente
                                     }
                                 }
                             }
+
+                            else if (mensagem.StartsWith("GERAL|"))
+                            {
+                                string[] partes = mensagem.Split('|', 3);
+
+                                if (partes.Length == 3)
+                                {
+                                    string remetente = partes[1];
+                                    string texto = partes[2];
+
+                                    // Evita duplicar a própria mensagem,
+                                    // porque ela já foi adicionada ao clicar em Enviar
+                                    if (remetente != nomeUsuario)
+                                    {
+                                        string textoExibicao = remetente + ": " + texto;
+
+                                        SalvarMensagem(
+                                            "Chat Geral",
+                                            textoExibicao,
+                                            false
+                                        );
+
+                                        if (lstUsuarios.SelectedItem == null ||
+                                            lstUsuarios.SelectedItem.ToString() != "Chat Geral")
+                                        {
+                                            conversasNaoLidas.Add("Chat Geral");
+                                            lstUsuarios.Invalidate();
+                                        }
+
+                                        if (lstUsuarios.SelectedItem != null &&
+                                            lstUsuarios.SelectedItem.ToString() == "Chat Geral")
+                                        {
+                                            AdicionarMensagem(
+                                                textoExibicao,
+                                                false
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+
                             else if (mensagem.StartsWith("MENSAGEM|"))
                             {
                                 string[] partes = mensagem.Split('|', 3);
@@ -84,7 +133,19 @@ namespace ChatCliente
                                     string remetente = partes[1];
                                     string texto = partes[2];
 
-                                    AdicionarMensagem(texto, false);
+                                    SalvarMensagem(remetente, texto, false);
+                                    if (lstUsuarios.SelectedItem == null ||
+                                        lstUsuarios.SelectedItem.ToString() != remetente)
+                                    {
+                                        conversasNaoLidas.Add(remetente);
+                                        lstUsuarios.Invalidate();
+                                    }
+
+                                    if (lstUsuarios.SelectedItem != null &&
+                                        lstUsuarios.SelectedItem.ToString() == remetente)
+                                    {
+                                        AdicionarMensagem(texto, false);
+                                    }
                                 }
                             }
                         }));
@@ -110,6 +171,40 @@ namespace ChatCliente
             byte[] dados = Encoding.UTF8.GetBytes(mensagem);
 
             socket.SendTo(dados, servidor);
+        }
+
+        private void SalvarMensagem(
+            string usuario,
+            string texto,
+            bool minhaMensagem)
+        {
+            if (!conversas.ContainsKey(usuario))
+            {
+                conversas[usuario] =
+                    new List<(string texto, bool minhaMensagem)>();
+            }
+
+            conversas[usuario].Add(
+                (texto, minhaMensagem)
+            );
+        }
+
+        private void CarregarConversa(string usuario)
+        {
+            pnlMensagens.Controls.Clear();
+
+            if (!conversas.ContainsKey(usuario))
+            {
+                return;
+            }
+
+            foreach (var mensagem in conversas[usuario])
+            {
+                AdicionarMensagem(
+                    mensagem.texto,
+                    mensagem.minhaMensagem
+                );
+            }
         }
 
         private void AdicionarMensagem(string texto, bool minhaMensagem)
@@ -182,9 +277,19 @@ namespace ChatCliente
 
             string destinatario = lstUsuarios.SelectedItem.ToString();
 
-            // Monta a mensagem que será enviada ao servidor
-            string mensagemEnviar =
-                "MENSAGEM|" + destinatario + "|" + mensagem;
+            SalvarMensagem(destinatario, mensagem, true);
+
+            string mensagemEnviar;
+
+            if (destinatario == "Chat Geral")
+            {
+                mensagemEnviar = "GERAL|" + mensagem;
+            }
+            else
+            {
+                mensagemEnviar =
+                    "MENSAGEM|" + destinatario + "|" + mensagem;
+            }
 
             byte[] dados = Encoding.UTF8.GetBytes(mensagemEnviar);
 
@@ -199,10 +304,18 @@ namespace ChatCliente
         {
             if (lstUsuarios.SelectedItem != null)
             {
-                lblUsuarioConversa.Text = lstUsuarios.SelectedItem.ToString();
+                string usuarioSelecionado =
+                    lstUsuarios.SelectedItem.ToString();
 
-                lblStatusConversa.Text = "● Online";
+                conversasNaoLidas.Remove(usuarioSelecionado);
+                lstUsuarios.Invalidate();
+
+                lblUsuarioConversa.Text = usuarioSelecionado;
+
+                lblStatusConversa.Text = "Online";
                 lblStatusConversa.ForeColor = Color.Green;
+
+                CarregarConversa(usuarioSelecionado);
             }
         }
 
@@ -219,6 +332,44 @@ namespace ChatCliente
         private void pnlEnvio_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void lstUsuarios_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0)
+                return;
+
+            e.DrawBackground();
+
+            string nome = lstUsuarios.Items[e.Index].ToString();
+
+            Brush corTexto = Brushes.Black;
+
+            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+            {
+                corTexto = Brushes.White;
+            }
+
+            e.Graphics.DrawString(
+                nome,
+                e.Font,
+                corTexto,
+                e.Bounds.Left + 3,
+                e.Bounds.Top + 2
+            );
+
+            if (conversasNaoLidas.Contains(nome))
+            {
+                e.Graphics.DrawString(
+                    "●",
+                    e.Font,
+                    Brushes.DarkGray,
+                    e.Bounds.Right - 20,
+                    e.Bounds.Top + 2
+                );
+            }
+
+            e.DrawFocusRectangle();
         }
 
 

@@ -57,7 +57,8 @@
             // 
             lstUsuarios.BackColor = Color.FromArgb(252, 240, 248);
             lstUsuarios.BorderStyle = BorderStyle.None;
-            lstUsuarios.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lstUsuarios.DrawMode = DrawMode.OwnerDrawFixed;
+            lstUsuarios.Font = new Font("Segoe UI Semibold", 11.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lstUsuarios.ForeColor = Color.FromArgb(31, 41, 55);
             lstUsuarios.FormattingEnabled = true;
             lstUsuarios.ItemHeight = 20;
@@ -65,6 +66,7 @@
             lstUsuarios.Name = "lstUsuarios";
             lstUsuarios.Size = new Size(230, 220);
             lstUsuarios.TabIndex = 8;
+            lstUsuarios.DrawItem += lstUsuarios_DrawItem;
             lstUsuarios.SelectedIndexChanged += lstUsuarios_SelectedIndexChanged;
             // 
             // btnEnvia
