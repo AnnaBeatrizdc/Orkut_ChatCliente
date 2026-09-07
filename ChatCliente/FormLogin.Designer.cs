@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormLogin));
-            txtNome = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
+            txtLogin = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
             lblDescricao = new Label();
             btnEntra = new ReaLTaiizor.Controls.HopeButton();
             lblStatus = new Label();
@@ -37,36 +37,36 @@
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             SuspendLayout();
             // 
-            // txtNome
+            // txtLogin
             // 
-            txtNome.AnimateReadOnly = false;
-            txtNome.AutoCompleteMode = AutoCompleteMode.None;
-            txtNome.AutoCompleteSource = AutoCompleteSource.None;
-            txtNome.BackgroundImageLayout = ImageLayout.None;
-            txtNome.CharacterCasing = CharacterCasing.Normal;
-            txtNome.Depth = 0;
-            txtNome.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtNome.HideSelection = true;
-            txtNome.Hint = "Digite seu nome.";
-            txtNome.LeadingIcon = null;
-            txtNome.Location = new Point(162, 239);
-            txtNome.MaxLength = 32767;
-            txtNome.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
-            txtNome.Name = "txtNome";
-            txtNome.PasswordChar = '\0';
-            txtNome.PrefixSuffixText = null;
-            txtNome.ReadOnly = false;
-            txtNome.RightToLeft = RightToLeft.No;
-            txtNome.SelectedText = "";
-            txtNome.SelectionLength = 0;
-            txtNome.SelectionStart = 0;
-            txtNome.ShortcutsEnabled = true;
-            txtNome.Size = new Size(330, 48);
-            txtNome.TabIndex = 2;
-            txtNome.TabStop = false;
-            txtNome.TextAlign = HorizontalAlignment.Left;
-            txtNome.TrailingIcon = null;
-            txtNome.UseSystemPasswordChar = false;
+            txtLogin.AnimateReadOnly = false;
+            txtLogin.AutoCompleteMode = AutoCompleteMode.None;
+            txtLogin.AutoCompleteSource = AutoCompleteSource.None;
+            txtLogin.BackgroundImageLayout = ImageLayout.None;
+            txtLogin.CharacterCasing = CharacterCasing.Normal;
+            txtLogin.Depth = 0;
+            txtLogin.Font = new Font("Segoe UI", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            txtLogin.HideSelection = true;
+            txtLogin.Hint = "Digite seu nome.";
+            txtLogin.LeadingIcon = null;
+            txtLogin.Location = new Point(162, 239);
+            txtLogin.MaxLength = 32767;
+            txtLogin.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
+            txtLogin.Name = "txtLogin";
+            txtLogin.PasswordChar = '\0';
+            txtLogin.PrefixSuffixText = null;
+            txtLogin.ReadOnly = false;
+            txtLogin.RightToLeft = RightToLeft.No;
+            txtLogin.SelectedText = "";
+            txtLogin.SelectionLength = 0;
+            txtLogin.SelectionStart = 0;
+            txtLogin.ShortcutsEnabled = true;
+            txtLogin.Size = new Size(330, 48);
+            txtLogin.TabIndex = 2;
+            txtLogin.TabStop = false;
+            txtLogin.TextAlign = HorizontalAlignment.Left;
+            txtLogin.TrailingIcon = null;
+            txtLogin.UseSystemPasswordChar = false;
             // 
             // lblDescricao
             // 
@@ -133,7 +133,7 @@
             Controls.Add(lblStatus);
             Controls.Add(btnEntra);
             Controls.Add(lblDescricao);
-            Controls.Add(txtNome);
+            Controls.Add(txtLogin);
             Controls.Add(pictureBox2);
             ForeColor = SystemColors.ActiveCaptionText;
             FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -151,7 +151,7 @@
         }
 
         #endregion
-        private ReaLTaiizor.Controls.MaterialTextBoxEdit txtNome;
+        private ReaLTaiizor.Controls.MaterialTextBoxEdit txtLogin;
         private ReaLTaiizor.Controls.MaterialButton btnEntrar;
         private Label lblDescricao;
         private ReaLTaiizor.Controls.HopeTextBox hopeTextBox1;

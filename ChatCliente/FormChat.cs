@@ -23,6 +23,9 @@ namespace ChatCliente
         private HashSet<string> conversasNaoLidas =
             new HashSet<string>();
 
+        private HashSet<string> usuariosOnline =
+            new HashSet<string>();
+
         public FormChat(string nome)
         {
             InitializeComponent();
@@ -31,6 +34,12 @@ namespace ChatCliente
             lblNomeUsuario.Text = nomeUsuario;
 
             socket.Bind(new IPEndPoint(IPAddress.Any, 0));
+
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
 
             threadReceber = new Thread(ReceberMensagens);
             threadReceber.IsBackground = true;
@@ -67,21 +76,45 @@ namespace ChatCliente
                     {
                         BeginInvoke(new Action(() =>
                         {
-                            if (mensagem.StartsWith("USUARIOS|"))
+                            if (mensagem == "ERRO|NOME_EM_USO")
+                            {
+                                MessageBox.Show(
+                                    "Esse nome já está sendo usado por outro usuário.",
+                                    "Nome indisponível",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning
+                                );
+
+                                this.Close();
+                            }
+
+                            else if (mensagem.StartsWith("USUARIOS|"))
                             {
                                 string[] partes = mensagem.Split('|');
 
-                                lstUsuarios.Items.Clear();
-
-                                lstUsuarios.Items.Add("Chat Geral");
+                                usuariosOnline.Clear();
 
                                 for (int i = 1; i < partes.Length; i++)
                                 {
-                                    if (partes[i] != nomeUsuario)
+                                    string usuario = partes[i];
+
+                                    if (usuario != nomeUsuario)
                                     {
-                                        lstUsuarios.Items.Add(partes[i]);
+                                        usuariosOnline.Add(usuario);
+
+                                        if (!lstUsuarios.Items.Contains(usuario))
+                                        {
+                                            lstUsuarios.Items.Add(usuario);
+                                        }
                                     }
                                 }
+
+                                if (!lstUsuarios.Items.Contains("Chat Geral"))
+                                {
+                                    lstUsuarios.Items.Insert(0, "Chat Geral");
+                                }
+
+                                AtualizarStatusUsuarioSelecionado();
                             }
 
                             else if (mensagem.StartsWith("GERAL|"))
@@ -207,6 +240,34 @@ namespace ChatCliente
             }
         }
 
+        private void AtualizarStatusUsuarioSelecionado()
+        {
+            if (lstUsuarios.SelectedItem == null)
+                return;
+
+            string usuario =
+                lstUsuarios.SelectedItem.ToString();
+
+            if (usuario == "Chat Geral")
+            {
+                lblStatusConversa.Text = "• Online";
+                lblStatusConversa.ForeColor = Color.Green;
+
+                return;
+            }
+
+            if (usuariosOnline.Contains(usuario))
+            {
+                lblStatusConversa.Text = "• Online";
+                lblStatusConversa.ForeColor = Color.Green;
+            }
+            else
+            {
+                lblStatusConversa.Text = "• Offline";
+                lblStatusConversa.ForeColor = Color.Gray;
+            }
+        }
+
         private void AdicionarMensagem(string texto, bool minhaMensagem)
         {
             // Painel que ocupa a largura da conversa
@@ -277,6 +338,15 @@ namespace ChatCliente
 
             string destinatario = lstUsuarios.SelectedItem.ToString();
 
+            if (destinatario != "Chat Geral" && !usuariosOnline.Contains(destinatario))
+            {
+                MessageBox.Show(
+                    "Este usuário está offline no momento."
+                );
+
+                return;
+            }
+
             SalvarMensagem(destinatario, mensagem, true);
 
             string mensagemEnviar;
@@ -304,18 +374,20 @@ namespace ChatCliente
         {
             if (lstUsuarios.SelectedItem != null)
             {
-                string usuarioSelecionado =
-                    lstUsuarios.SelectedItem.ToString();
+                if (lstUsuarios.SelectedItem != null)
+                {
+                    string usuarioSelecionado =
+                        lstUsuarios.SelectedItem.ToString();
 
-                conversasNaoLidas.Remove(usuarioSelecionado);
-                lstUsuarios.Invalidate();
+                    conversasNaoLidas.Remove(usuarioSelecionado);
+                    lstUsuarios.Invalidate();
 
-                lblUsuarioConversa.Text = usuarioSelecionado;
+                    lblUsuarioConversa.Text = usuarioSelecionado;
 
-                lblStatusConversa.Text = "Online";
-                lblStatusConversa.ForeColor = Color.Green;
+                    AtualizarStatusUsuarioSelecionado();
 
-                CarregarConversa(usuarioSelecionado);
+                    CarregarConversa(usuarioSelecionado);
+                }
             }
         }
 
@@ -326,6 +398,19 @@ namespace ChatCliente
 
         private void FormChat_FormClosing(object sender, FormClosingEventArgs e)
         {
+            try
+            {
+                string mensagem = "DESCONECTAR|" + nomeUsuario;
+
+                byte[] dados = Encoding.UTF8.GetBytes(mensagem);
+
+                socket.SendTo(dados, servidor);
+            }
+            catch
+            {
+                // Evita erro caso o servidor já esteja desligado
+            }
+
             socket.Close();
         }
 

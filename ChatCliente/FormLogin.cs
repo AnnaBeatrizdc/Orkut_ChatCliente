@@ -66,17 +66,102 @@ namespace ChatCliente
             }
         }
 
+        private bool NomeDisponivel(string nome)
+        {
+            try
+            {
+                using (Socket socket = new Socket(
+                    AddressFamily.InterNetwork,
+                    SocketType.Dgram,
+                    ProtocolType.Udp))
+                {
+                    socket.ReceiveTimeout = 1500;
+
+                    IPEndPoint servidor = new IPEndPoint(
+                        IPAddress.Parse("192.168.0.9"),
+                        9060
+                    );
+
+                    string mensagem =
+                        "VERIFICAR_NOME|" + nome;
+
+                    byte[] dados =
+                        Encoding.UTF8.GetBytes(mensagem);
+
+                    socket.SendTo(
+                        dados,
+                        servidor
+                    );
+
+                    byte[] resposta = new byte[1024];
+
+                    EndPoint remetente =
+                        new IPEndPoint(
+                            IPAddress.Any,
+                            0
+                        );
+
+                    int quantidade =
+                        socket.ReceiveFrom(
+                            resposta,
+                            ref remetente
+                        );
+
+                    string resultado =
+                        Encoding.UTF8.GetString(
+                            resposta,
+                            0,
+                            quantidade
+                        );
+
+                    return resultado ==
+                        "NOME_DISPONIVEL";
+                }
+            }
+            catch
+            {
+                MessageBox.Show(
+                    "Não foi possível verificar o nome. Verifique se o servidor está online.",
+                    "Erro de conexão",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+
+                return false;
+            }
+        }
+
         private void btnEntra_Click(object sender, EventArgs e)
         {
-            string nome = txtNome.Text.Trim();
+            string nome =
+        txtLogin.Text.Trim();
 
             if (nome == "")
             {
-                MessageBox.Show("Digite seu nome.");
+                MessageBox.Show(
+                    "Digite seu nome."
+                );
+
                 return;
             }
 
-            FormChat chat = new FormChat(nome);
+            if (!NomeDisponivel(nome))
+            {
+                MessageBox.Show(
+                    "Esse nome já está sendo usado.\nEscolha outro nome.",
+                    "Nome indisponível",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                txtLogin.Focus();
+                txtLogin.SelectAll();
+
+                return;
+            }
+
+            FormChat chat =
+                new FormChat(nome);
 
             chat.Show();
 
