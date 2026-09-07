@@ -1,8 +1,10 @@
 # 💬 Chat Cliente
 
-Aplicação de chat desenvolvida em **C# com Windows Forms**, utilizando **Sockets UDP** para comunicação entre múltiplos usuários através de um servidor central.
+Aplicação de chat multiusuário desenvolvida em **C# com Windows Forms**, utilizando **Sockets UDP** para comunicação através de um servidor central.
 
-O projeto foi desenvolvido como parte de um desafio acadêmico, permitindo conversas privadas e comunicação em grupo entre diferentes usuários.
+O projeto foi desenvolvido como parte de um desafio acadêmico e possui uma identidade visual inspirada no **Orkut**, trazendo uma releitura mais moderna da clássica rede social.
+
+A aplicação combina essa proposta visual com funcionalidades atuais de mensageria, permitindo **conversas privadas, Chat Geral, usuários online e offline, notificações e reconexão automática ao servidor**.
 
 ---
 
