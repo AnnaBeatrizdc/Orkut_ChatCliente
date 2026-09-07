@@ -26,6 +26,10 @@ namespace ChatCliente
         private HashSet<string> usuariosOnline =
             new HashSet<string>();
 
+        private bool servidorOnline = true;
+
+        private System.Windows.Forms.Timer timerServidor;
+
         public FormChat(string nome)
         {
             InitializeComponent();
@@ -46,6 +50,16 @@ namespace ChatCliente
             threadReceber.Start();
 
             ConectarAoServidor();
+
+            timerServidor = new System.Windows.Forms.Timer();
+            timerServidor.Interval = 3000;
+
+            timerServidor.Tick += async (s, args) =>
+            {
+                await VerificarServidorDuranteChat();
+            };
+
+            timerServidor.Start();
         }
 
         private void ReceberMensagens()
@@ -100,12 +114,32 @@ namespace ChatCliente
 
                                     if (usuario != nomeUsuario)
                                     {
-                                        usuariosOnline.Add(usuario);
+                                        string usuarioExistente = null;
 
-                                        if (!lstUsuarios.Items.Contains(usuario))
+                                        foreach (var item in lstUsuarios.Items)
+                                        {
+                                            string nomeLista = item.ToString();
+
+                                            if (nomeLista.Equals(
+                                                usuario,
+                                                StringComparison.OrdinalIgnoreCase
+                                            ))
+                                            {
+                                                usuarioExistente = nomeLista;
+                                                break;
+                                            }
+                                        }
+
+                                        if (usuarioExistente == null)
                                         {
                                             lstUsuarios.Items.Add(usuario);
                                         }
+                                        else
+                                        {
+                                            usuario = usuarioExistente;
+                                        }
+
+                                        usuariosOnline.Add(usuario);
                                     }
                                 }
 
@@ -166,6 +200,8 @@ namespace ChatCliente
                                     string remetente = partes[1];
                                     string texto = partes[2];
 
+                                    remetente = ObterNomePadronizado(remetente);
+
                                     SalvarMensagem(remetente, texto, false);
                                     if (lstUsuarios.SelectedItem == null ||
                                         lstUsuarios.SelectedItem.ToString() != remetente)
@@ -206,6 +242,75 @@ namespace ChatCliente
             socket.SendTo(dados, servidor);
         }
 
+        private async Task VerificarServidorDuranteChat()
+        {
+            bool estavaOnline = servidorOnline;
+
+            servidorOnline = await Task.Run(() =>
+            {
+                try
+                {
+                    using (Socket socketTeste = new Socket(
+                        AddressFamily.InterNetwork,
+                        SocketType.Dgram,
+                        ProtocolType.Udp))
+                    {
+                        socketTeste.ReceiveTimeout = 700;
+
+                        byte[] dados =
+                            Encoding.UTF8.GetBytes("PING");
+
+                        socketTeste.SendTo(
+                            dados,
+                            servidor
+                        );
+
+                        byte[] resposta =
+                            new byte[1024];
+
+                        EndPoint remetente =
+                            new IPEndPoint(
+                                IPAddress.Any,
+                                0
+                            );
+
+                        int quantidade =
+                            socketTeste.ReceiveFrom(
+                                resposta,
+                                ref remetente
+                            );
+
+                        string resultado =
+                            Encoding.UTF8.GetString(
+                                resposta,
+                                0,
+                                quantidade
+                            );
+
+                        return resultado == "PONG";
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+
+            if (!servidorOnline)
+            {
+                usuariosOnline.Clear();
+
+                AtualizarStatusUsuarioSelecionado();
+
+                lstUsuarios.Invalidate();
+            }
+
+            if (!estavaOnline && servidorOnline)
+            {
+                ConectarAoServidor();
+            }
+        }
+
         private void SalvarMensagem(
             string usuario,
             string texto,
@@ -220,6 +325,24 @@ namespace ChatCliente
             conversas[usuario].Add(
                 (texto, minhaMensagem)
             );
+        }
+
+        private string ObterNomePadronizado(string usuario)
+        {
+            foreach (var item in lstUsuarios.Items)
+            {
+                string nomeLista = item.ToString();
+
+                if (nomeLista.Equals(
+                    usuario,
+                    StringComparison.OrdinalIgnoreCase
+                ))
+                {
+                    return nomeLista;
+                }
+            }
+
+            return usuario;
         }
 
         private void CarregarConversa(string usuario)
@@ -321,6 +444,19 @@ namespace ChatCliente
 
         private void btnEnvia_Click(object sender, EventArgs e)
         {
+
+            if (!servidorOnline)
+            {
+                MessageBox.Show(
+                    "O servidor está offline no momento.",
+                    "Servidor offline",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                return;
+            }
+
             // Verifica se um usuário foi selecionado
             if (lstUsuarios.SelectedItem == null)
             {
@@ -398,6 +534,10 @@ namespace ChatCliente
 
         private void FormChat_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (timerServidor != null)
+            {
+                timerServidor.Stop();
+            }
             try
             {
                 string mensagem = "DESCONECTAR|" + nomeUsuario;
@@ -456,29 +596,5 @@ namespace ChatCliente
 
             e.DrawFocusRectangle();
         }
-
-
-
-        //private void btnConectar_Click(object sender, EventArgs e)
-        //{
-        //    string nome = txtUsuario.Text.Trim();
-
-        //    if (nome == "")
-        //    {
-        //        MessageBox.Show("Digite seu nome.");
-        //        return;
-        //    }
-
-        //    string mensagem = "CONECTAR|" + nome;
-
-        //    byte[] dados = Encoding.UTF8.GetBytes(mensagem);
-
-        //    socket.SendTo(dados, servidor);
-
-        //    MessageBox.Show("Conectado como " + nome);
-
-        //    txtUsuario.Enabled = false;
-        //    btnConectar.Enabled = false;
-        //}
     }
 }
