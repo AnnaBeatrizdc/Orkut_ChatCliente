@@ -28,11 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormLogin));
             txtNome = new ReaLTaiizor.Controls.MaterialTextBoxEdit();
-            lblLogo = new Label();
             lblDescricao = new Label();
             btnEntra = new ReaLTaiizor.Controls.HopeButton();
             lblStatus = new Label();
+            pictureBox2 = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             SuspendLayout();
             // 
             // txtNome
@@ -47,7 +49,7 @@
             txtNome.HideSelection = true;
             txtNome.Hint = "Digite seu nome.";
             txtNome.LeadingIcon = null;
-            txtNome.Location = new Point(162, 209);
+            txtNome.Location = new Point(162, 239);
             txtNome.MaxLength = 32767;
             txtNome.MouseState = ReaLTaiizor.Helper.MaterialDrawHelper.MaterialMouseState.OUT;
             txtNome.Name = "txtNome";
@@ -66,30 +68,16 @@
             txtNome.TrailingIcon = null;
             txtNome.UseSystemPasswordChar = false;
             // 
-            // lblLogo
-            // 
-            lblLogo.BackColor = Color.Transparent;
-            lblLogo.Font = new Font("Segoe UI", 27.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblLogo.ForeColor = Color.FromArgb(233, 30, 140);
-            lblLogo.Location = new Point(152, 75);
-            lblLogo.Name = "lblLogo";
-            lblLogo.Size = new Size(350, 51);
-            lblLogo.TabIndex = 4;
-            lblLogo.Text = "Orkut 2.0";
-            lblLogo.TextAlign = ContentAlignment.MiddleCenter;
-
-            // 
             // lblDescricao
             // 
             lblDescricao.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblDescricao.ForeColor = Color.FromArgb(107, 114, 128);
-            lblDescricao.Location = new Point(162, 140);
+            lblDescricao.Location = new Point(162, 168);
             lblDescricao.Name = "lblDescricao";
             lblDescricao.Size = new Size(330, 55);
             lblDescricao.TabIndex = 5;
             lblDescricao.Text = "Conecte-se e converse com seus amigos";
             lblDescricao.TextAlign = ContentAlignment.MiddleCenter;
-
             // 
             // btnEntra
             // 
@@ -102,7 +90,7 @@
             btnEntra.ForeColor = Color.White;
             btnEntra.HoverTextColor = Color.FromArgb(48, 49, 51);
             btnEntra.InfoColor = Color.FromArgb(144, 147, 153);
-            btnEntra.Location = new Point(210, 289);
+            btnEntra.Location = new Point(210, 319);
             btnEntra.Name = "btnEntra";
             btnEntra.PrimaryColor = Color.FromArgb(233, 30, 140);
             btnEntra.Size = new Size(230, 48);
@@ -119,30 +107,44 @@
             lblStatus.BackColor = Color.Transparent;
             lblStatus.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblStatus.ForeColor = Color.FromArgb(22, 163, 74);
-            lblStatus.Location = new Point(264, 371);
+            lblStatus.Location = new Point(264, 401);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(112, 17);
             lblStatus.TabIndex = 9;
             lblStatus.Text = "●  Servidor online";
             lblStatus.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // pictureBox2
+            // 
+            pictureBox2.Image = Properties.Resources._3;
+            pictureBox2.Location = new Point(200, -23);
+            pictureBox2.Name = "pictureBox2";
+            pictureBox2.Size = new Size(245, 229);
+            pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox2.TabIndex = 16;
+            pictureBox2.TabStop = false;
+            // 
             // FormLogin
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.White;
+            BackColor = Color.FromArgb(247, 247, 251);
             ClientSize = new Size(671, 461);
             Controls.Add(lblStatus);
             Controls.Add(btnEntra);
             Controls.Add(lblDescricao);
-            Controls.Add(lblLogo);
             Controls.Add(txtNome);
+            Controls.Add(pictureBox2);
             ForeColor = SystemColors.ActiveCaptionText;
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
+            MinimizeBox = false;
             Name = "FormLogin";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Orkut | Login";
+            Shown += FormLogin_Shown;
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             ResumeLayout(false);
             PerformLayout();
 
@@ -151,10 +153,10 @@
         #endregion
         private ReaLTaiizor.Controls.MaterialTextBoxEdit txtNome;
         private ReaLTaiizor.Controls.MaterialButton btnEntrar;
-        private Label lblLogo;
         private Label lblDescricao;
         private ReaLTaiizor.Controls.HopeTextBox hopeTextBox1;
         private ReaLTaiizor.Controls.HopeButton btnEntra;
         private Label lblStatus;
+        private PictureBox pictureBox2;
     }
 }

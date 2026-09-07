@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,6 +22,50 @@ namespace ChatCliente
             this.BackColor = Color.FromArgb(247, 247, 251);
         }
 
+        private bool VerificarServidor()
+        {
+            try
+            {
+                using (Socket socketTeste = new Socket(
+                    AddressFamily.InterNetwork,
+                    SocketType.Dgram,
+                    ProtocolType.Udp))
+                {
+                    socketTeste.ReceiveTimeout = 1000;
+
+                    IPEndPoint servidor = new IPEndPoint(
+                        IPAddress.Parse("192.168.0.9"),
+                        9060
+                    );
+
+                    byte[] dados = Encoding.UTF8.GetBytes("PING");
+
+                    socketTeste.SendTo(dados, servidor);
+
+                    byte[] resposta = new byte[1024];
+
+                    EndPoint origem = new IPEndPoint(IPAddress.Any, 0);
+
+                    int quantidade = socketTeste.ReceiveFrom(
+                        resposta,
+                        ref origem
+                    );
+
+                    string mensagem = Encoding.UTF8.GetString(
+                        resposta,
+                        0,
+                        quantidade
+                    );
+
+                    return mensagem == "PONG";
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void btnEntra_Click(object sender, EventArgs e)
         {
             string nome = txtNome.Text.Trim();
@@ -30,11 +76,25 @@ namespace ChatCliente
                 return;
             }
 
-            Form1 chat = new Form1(nome);
+            FormChat chat = new FormChat(nome);
 
             chat.Show();
 
             this.Hide();
+        }
+
+        private void FormLogin_Shown(object sender, EventArgs e)
+        {
+            if (VerificarServidor())
+            {
+                lblStatus.Text = "● Servidor Online";
+                lblStatus.ForeColor = Color.Green;
+            }
+            else
+            {
+                lblStatus.Text = "● Servidor Offline";
+                lblStatus.ForeColor = Color.Gray;
+            }
         }
     }
 }
